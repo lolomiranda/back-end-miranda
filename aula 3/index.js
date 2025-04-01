@@ -4,7 +4,6 @@ const userService = require ("./userService");
 const app = express(); // Cria uma instância do aplicativo Express
 app.use(express.json()); // Configura o Express para interpretar requisições com corpo no formato JSON
 
-
 //rota para criar usuario
 app.post("/users", (req, res)=>{
     const {nome, email, senha, endereco, telefone, cpf} = req.body;
