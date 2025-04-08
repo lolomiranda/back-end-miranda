@@ -1,5 +1,5 @@
 const express = require("express");
-const userService = require ("./userService");
+const userService = require ("./userService.js");
 
 const app = express(); // Cria uma instância do aplicativo Express
 app.use(express.json()); // Configura o Express para interpretar requisições com corpo no formato JSON
