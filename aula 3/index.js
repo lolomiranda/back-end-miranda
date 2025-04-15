@@ -1,56 +1,60 @@
-const express = require("express");
-const userService = require ("./userService.js");
+const express = require('express');
+const userService = require('./userService');
 
-const app = express(); // Cria uma instância do aplicativo Express
-app.use(express.json()); // Configura o Express para interpretar requisições com corpo no formato JSON
+const app = express(); //nome qualquer para express
+app.use(express.json()); // vou habilitar json no express
 
-//rota para criar usuario
-app.post("/users", (req, res)=>{
-    const {nome, email, senha, endereco, telefone, cpf} = req.body;
-    if(!nome || !email || !senha || !endereco || !telefone || !cpf){   // Verifica se todos os campos obrigatórios foram fornecidos
-        return res.status(400).json
-        ({error: "nome e email são obrigatorios"})
+// userService.loadUsers();
+// userService.getNextId();
+
+app.post("/users", async (req, res) => {
+    try {
+        const { nome, email, endereco, senha, telefone, cpf } = req.body;
+        if (!nome || !email || !endereco || !senha || !telefone || !cpf) {
+            return res.status(400).json
+                ({ error: "Nome, email, endereço, senha, telefone e CPF são obrigatorios" })
+        }
+        const user = await userService.addUser(nome, email, endereco, senha, telefone, cpf);
+        res.status(201).json({ mensagem: "Usuário Cadastrado com Sucesso!" });
+    } catch (erro) {
+        console.log(erro);
+        res.status(400).json({ error: erro.message });
     }
-
-    const user = userService.addUser(nome, email, senha, endereco, telefone, cpf);  // Chama a função "addUser" do userService para adicionar o usuário
-    res.status(200).json({user});
-})
-
-//rota para listar todos os usuários
-app.get("/users", (req, res)=>{
-    res.json(userService.getUsers());  // Retorna a lista de usuários chamando "getUsers" do userService. Get = mostrar
 });
 
+//rota para listar todos os usuarios
+app.get("/users", (req, res) => {
+    res.json(userService.getUsers());
+});
 
-//porta onde o servidor está rodando
-
-const port = 3000; 
-app.listen(port,() =>{
-    console.log("Servidor rodando na porta:", port);  //se estiver rodando mostra a mensagem
-})
-
-
-//excluir o usuário através do id
-
+// Rota para excluir um usuário pelo ID
 app.delete("/users/:id", (req, res) => {
-    const id = parseInt(req.params.id); //converte o id para número
-    try{
-        id = Number(id);  //converte para um numero
-        const resultado = userService.deleteUser(id); //tenta excluir o usuário
-        res.status(200).json(resultado); //se der certo, retorna a mensagem
-    }catch{
-        res.status(404).json({error: erro.message}); //caso de errado, retorna a mensagem de erro
+    const id = parseInt(req.params.id);
+    // Converte o ID para número
+    try {
+        const resultado = userService.deleteUser(id);
+        // Tenta excluir o usuário
+        res.status(200).json(resultado);
+        // Retorna a mensagem de sucesso
+    } catch (erro) {
+        res.status(404).json({ error: erro.message });
+        // Retorna a mensagem de erro
     }
-})
+});
 
-app.delete("/users", (req, res) => {
-    const id = req.params.id; // pega o ID 
+app.put("/users/:id", (req, res) => {
+    const id = parseInt(req.params.id);
+    const { nome, email, endereco, senha, telefone, cpf } = req.body;
 
-    const resultado = userService.deleteUser(id); // Chama o método corrigido
-
-    if (resultado.error) {
-        return res.status(404).json(resultado); // Retorna erro caso o ID não exista
+    try {
+        const user = userService.updateUser(id, nome, email, endereco, senha, telefone, cpf);
+        res.status(200).json({"Usuario atualizado com sucesso": user});
+    } catch (erro) {
+        res.status(404).json({ error: erro.message });
     }
+});
 
-    res.status(200).json(resultado);
+const port = 3000;
+app.listen(port, () => {
+    console.log("Servidor rodando na porta: ", port);
 })
