@@ -24,20 +24,32 @@ class userService {
         }
     }
 
-    getUsers() { //função para buscar usuarios
+    async getUsers() { //função para buscar usuarios
         try {
-            return this.users
+            const resultado = await mysql.execute(
+                `SELECT idusuário FROM usuário WHERE id = ?`,
+                [id] 
+            ); 
+            console.log("resultado", resultado);
+            return resultado;
         } catch (erro) {
             console.log('Erro ao buscar usuarios', erro);
         }
     }
 
-    deleteUser(id) {
+    async deleteUser(id) {
         try {
-            this.users = this.users.filter(user => user.id !== id);
-            this.saveUsers();
-
-        } catch {
+          const user = await this. getUser(id);
+          if(user.length == 0){
+            console.log ("usuário não encontrado");
+            return;
+          }
+          const resultado = await mysql.execute(
+            `DELETE FROM usuário WHERE idusuário = ?`,
+            [id]
+          );
+          return resultado
+        } catch (erro) {
             console.log('Erro ao deletar usuario', erro);
         }
     }
